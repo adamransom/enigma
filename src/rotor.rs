@@ -4,11 +4,11 @@ use clap::ValueEnum;
 use const_for::const_for;
 
 // https://en.wikipedia.org/wiki/Enigma_rotor_details
-pub const I: RotorConfig = RotorConfig::new(RotorKind::I, b"EKMFLGDQVZNTOWYHXUSPAIBRCJ", b'Q');
-pub const II: RotorConfig = RotorConfig::new(RotorKind::II, b"AJDKSIRUXBLHWTMCQGZNPYFVOE", b'E');
-pub const III: RotorConfig = RotorConfig::new(RotorKind::III, b"BDFHJLCPRTXVZNYEIWGAKMUSQO", b'V');
-pub const IV: RotorConfig = RotorConfig::new(RotorKind::IV, b"ESOVPZJAYQUIRHXLNFTGKDCMWB", b'J');
-pub const V: RotorConfig = RotorConfig::new(RotorKind::V, b"VZBRGITYUPSDNHLXAWMJQOFECK", b'Z');
+const I: RotorConfig = RotorConfig::new(RotorKind::I, b"EKMFLGDQVZNTOWYHXUSPAIBRCJ", b'Q');
+const II: RotorConfig = RotorConfig::new(RotorKind::II, b"AJDKSIRUXBLHWTMCQGZNPYFVOE", b'E');
+const III: RotorConfig = RotorConfig::new(RotorKind::III, b"BDFHJLCPRTXVZNYEIWGAKMUSQO", b'V');
+const IV: RotorConfig = RotorConfig::new(RotorKind::IV, b"ESOVPZJAYQUIRHXLNFTGKDCMWB", b'J');
+const V: RotorConfig = RotorConfig::new(RotorKind::V, b"VZBRGITYUPSDNHLXAWMJQOFECK", b'Z');
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[value(rename_all = "UPPER")]
@@ -66,7 +66,29 @@ pub struct Rotor {
     pub ring_setting: usize,
 }
 
+/// Wraps a number to keep it between 0 and 25 e.g -1 becomes 25 and 26 becomes 0
+macro_rules! wrap {
+    ($($operation:tt)*) => { (ALPHA_LENGTH + $($operation)*) % ALPHA_LENGTH }
+}
+
 impl Rotor {
+    /// Create a rotor from a specific config (i.e. wiring) with a ring setting and initial position
+    pub fn new(rotor: RotorKind, ring_setting: usize, position: usize) -> Self {
+        let config = match rotor {
+            RotorKind::I => &I,
+            RotorKind::II => &II,
+            RotorKind::III => &III,
+            RotorKind::IV => &IV,
+            RotorKind::V => &V,
+        };
+
+        Rotor {
+            config,
+            position,
+            ring_setting,
+        }
+    }
+
     pub fn step(&mut self) {
         self.position = (self.position + 1) % ALPHA_LENGTH;
     }
@@ -90,22 +112,10 @@ impl Rotor {
     /// other rotors (i.e. at what position it will enter the next rotor), taking into account the
     /// ring setting and position (rotation) of the rotor.
     fn output_position(&self, wiring: &[usize; ALPHA_LENGTH], input_position: usize) -> usize {
-        let offset = self.position as isize - self.ring_setting as isize;
-        let input_pin = self.wrap(input_position as isize + offset);
-        let output_pin = wiring[input_pin] as isize;
+        let input_pin = wrap!(input_position + self.position - self.ring_setting);
+        let output_pin = wiring[input_pin];
 
-        self.wrap(output_pin - offset)
-    }
-
-    /// Wraps a number to keep it between 0 and 25 e.g -1 becomes 25 and 26 becomes 0
-    fn wrap(&self, value: isize) -> usize {
-        let delta = value % ALPHA_LENGTH as isize;
-
-        if delta < 0 {
-            (ALPHA_LENGTH as isize + delta) as usize
-        } else {
-            delta as usize
-        }
+        wrap!(output_pin - self.position + self.ring_setting)
     }
 }
 
