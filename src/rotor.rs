@@ -66,9 +66,20 @@ pub struct Rotor {
     pub ring_setting: usize,
 }
 
-/// Wraps a number to keep it between 0 and 25 e.g -1 becomes 25 and 26 becomes 0
-macro_rules! wrap {
-    ($($operation:tt)*) => { (ALPHA_LENGTH + $($operation)*) % ALPHA_LENGTH }
+/// Add two numbers, wrapping round to 0 if they exceed 25
+fn wrapping_add(a: usize, b: usize) -> usize {
+    match a + b {
+        val @ 0..=25 => val,
+        val => val - ALPHA_LENGTH,
+    }
+}
+
+/// Subtract two numbers, wrapping round to 25 if they go below 0
+fn wrapping_sub(a: usize, b: usize) -> usize {
+    match a.overflowing_sub(b) {
+        (_, true) => ALPHA_LENGTH - b + a,
+        (val, false) => val,
+    }
 }
 
 impl Rotor {
@@ -90,7 +101,7 @@ impl Rotor {
     }
 
     pub fn step(&mut self) {
-        self.position = (self.position + 1) % ALPHA_LENGTH;
+        self.position = wrapping_add(self.position, 1);
     }
 
     /// Get the output position for a specific input position, if going right to left on the rotor.
@@ -112,10 +123,13 @@ impl Rotor {
     /// other rotors (i.e. at what position it will enter the next rotor), taking into account the
     /// ring setting and position (rotation) of the rotor.
     fn output_position(&self, wiring: &[usize; ALPHA_LENGTH], input_position: usize) -> usize {
-        let input_pin = wrap!(input_position + self.position - self.ring_setting);
+        let offset = wrapping_sub(self.position, self.ring_setting);
+
+        let input_pin = wrapping_add(input_position, offset);
+
         let output_pin = wiring[input_pin];
 
-        wrap!(output_pin - self.position + self.ring_setting)
+        wrapping_sub(output_pin, offset)
     }
 }
 

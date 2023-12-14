@@ -64,7 +64,7 @@ impl Enigma {
 
         pin = self.plugboard.output_for(pin);
 
-        char::from_u32((pin + 65) as u32).unwrap()
+        (pin as u8 + b'A') as char
     }
 }
 
