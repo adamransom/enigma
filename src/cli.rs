@@ -1,15 +1,38 @@
 use crate::reflector::ReflectorKind;
 use crate::rotor::RotorKind;
 use crate::utils::try_to_alphabet_index;
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use std::str::FromStr;
 
 #[derive(Parser)]
 #[command(author, version, about)]
 pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    Run(RunArgs),
+    Crack(CrackArgs),
+}
+
+#[derive(Args)]
+pub struct CrackArgs {
+    #[arg(long, value_parser = parse_plug_pair, num_args = 0..=13)]
+    /// [possible values: two unique alphabet characters]
+    pub plugs: Vec<(usize, usize)>,
+    #[arg(long)]
+    pub input: String,
+    #[arg(long)]
+    pub output: String,
+}
+
+#[derive(Args)]
+pub struct RunArgs {
     #[arg(long, value_enum)]
     pub reflector: ReflectorKind,
-    #[arg(long, required = true, value_name = "ROTOR", value_enum, num_args = 3)]
+    #[arg(long, required = false, value_name = "ROTOR", value_enum, num_args = 3)]
     pub rotors: Vec<RotorKind>,
     #[arg(long, required = true, value_name = "NUM", value_parser = clap::value_parser!(u8).range(1..=26), num_args = 3)]
     /// [possible values: 1 to 26]

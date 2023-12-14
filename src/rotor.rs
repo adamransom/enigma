@@ -4,11 +4,11 @@ use clap::ValueEnum;
 use const_for::const_for;
 
 // https://en.wikipedia.org/wiki/Enigma_rotor_details
-const I: RotorConfig = RotorConfig::new(RotorKind::I, b"EKMFLGDQVZNTOWYHXUSPAIBRCJ", b'Q');
-const II: RotorConfig = RotorConfig::new(RotorKind::II, b"AJDKSIRUXBLHWTMCQGZNPYFVOE", b'E');
-const III: RotorConfig = RotorConfig::new(RotorKind::III, b"BDFHJLCPRTXVZNYEIWGAKMUSQO", b'V');
-const IV: RotorConfig = RotorConfig::new(RotorKind::IV, b"ESOVPZJAYQUIRHXLNFTGKDCMWB", b'J');
-const V: RotorConfig = RotorConfig::new(RotorKind::V, b"VZBRGITYUPSDNHLXAWMJQOFECK", b'Z');
+pub const I: RotorConfig = RotorConfig::new(RotorKind::I, b"EKMFLGDQVZNTOWYHXUSPAIBRCJ", b'Q');
+pub const II: RotorConfig = RotorConfig::new(RotorKind::II, b"AJDKSIRUXBLHWTMCQGZNPYFVOE", b'E');
+pub const III: RotorConfig = RotorConfig::new(RotorKind::III, b"BDFHJLCPRTXVZNYEIWGAKMUSQO", b'V');
+pub const IV: RotorConfig = RotorConfig::new(RotorKind::IV, b"ESOVPZJAYQUIRHXLNFTGKDCMWB", b'J');
+pub const V: RotorConfig = RotorConfig::new(RotorKind::V, b"VZBRGITYUPSDNHLXAWMJQOFECK", b'Z');
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[value(rename_all = "UPPER")]
