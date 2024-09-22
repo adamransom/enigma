@@ -1,4 +1,4 @@
-A small Enimga (I/M3) emulator written in Rust. I plan to add the ability to "crack" the Enigma in various ways soon.
+A small Enimga (I/M3) emulator written in Rust.
 
 ### Usage
 
